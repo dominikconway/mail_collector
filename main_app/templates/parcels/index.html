@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>Parcel List</h1>
+
+{% for letter in parcels %}
+  <div class="card">
+    <div class="card-content">
+      <span class="card-title">{{ letter.classification }}</span>
+      <p>Class: {{ letter.classification }}</p>
+      <p>Weight: {{ letter.weight }}</p>
+      <p>Delivery destination: {{letter.destination}}</p>
+    </div>
+  </div>
+{% endfor %}
+
+{% endblock %}
