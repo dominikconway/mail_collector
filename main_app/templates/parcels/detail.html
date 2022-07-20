@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>Parcel Details</h1>
+
+<div class="card">
+  <div class="card-content">
+    <span class="card-title">Postage Paid: {{ parcel.postage }}</span>
+    <p>Weight: {{ parcel.weight }}</p>
+    <p>Destination: {{ parcel.destination }}</p>
+  </div>
+</div>
+
+{% endblock %}

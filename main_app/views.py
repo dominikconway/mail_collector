@@ -30,5 +30,5 @@ def parcels_index(request):
 
 def parcels_detail(request, parcel_id):
     parcel = Parcel.objects.get(id=parcel_id)
-    return render(request, 'parcels/detail.html', {'parcels': parcel})
+    return render(request, 'parcels/detail.html', {'parcel': parcel})
 
