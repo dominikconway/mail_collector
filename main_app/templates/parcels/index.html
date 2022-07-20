@@ -3,14 +3,16 @@
 
 <h1>Parcel List</h1>
 
-{% for letter in parcels %}
+{% for parcel in parcels %}
   <div class="card">
+    <a href="/parcels/{{ parcel.id }}">
     <div class="card-content">
-      <span class="card-title">{{ letter.classification }}</span>
-      <p>Class: {{ letter.classification }}</p>
-      <p>Weight: {{ letter.weight }}</p>
-      <p>Delivery destination: {{letter.destination}}</p>
+      <span class="card-title">{{ parcel.postage }}</span>
+      <p>Postage: {{ parcel.postage }}</p>
+      <p>Weight: {{ parcel.weight }} oz</p>
+      <p>Delivery destination: {{parcel.destination}}</p>
     </div>
+    </a>
   </div>
 {% endfor %}
 
