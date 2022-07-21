@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from .models import Parcel
 from django.http import HttpResponse
 
@@ -16,8 +17,21 @@ from django.http import HttpResponse
 #     Mail('Priority', 20, 'Charleston')
 # ]
 
+#Class Based Views
+class ParcelCreate(CreateView):
+    model = Parcel
+    fields = '__all__'
+    success_url = '/parcels/'
 
+class ParcelUpdate(UpdateView):
+    model = Parcel
+    fields = ['postage', 'weight', 'destination']
 
+class ParcelDelete(DeleteView):
+    model = Parcel
+    success_url = '/parcels/'
+
+####################
 def home(request):
     return HttpResponse('<h1>Hello World</h1>')
 
@@ -31,4 +45,7 @@ def parcels_index(request):
 def parcels_detail(request, parcel_id):
     parcel = Parcel.objects.get(id=parcel_id)
     return render(request, 'parcels/detail.html', {'parcel': parcel})
+
+
+
 

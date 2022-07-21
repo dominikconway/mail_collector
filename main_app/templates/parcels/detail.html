@@ -9,6 +9,10 @@
     <p>Weight: {{ parcel.weight }}</p>
     <p>Destination: {{ parcel.destination }}</p>
   </div>
+  <div class="card-action">
+    <a href="{% url 'parcels_update' parcel.id %}">Edit</a>
+    <a href="{% url 'parcels_delete' parcel.id %}">Delete</a>
+  </div>
 </div>
 
 {% endblock %}
