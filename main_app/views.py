@@ -61,7 +61,7 @@ def add_pickup(request, parcel_id):
         new_pickup.save()
     return redirect('detail', parcel_id=parcel_id)
 
-class AddonList(ListView):
+class AddonsList(ListView):
   model = Addon
 
 class AddOnsDetail(DetailView):
