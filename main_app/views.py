@@ -23,9 +23,6 @@ import boto3
 S3_BASE_URL = 'https://s3-us-west-1.amazonaws.com/'
 BUCKET = 'mail-collector-dc'
 
-
-
-
 #Class Based Views
 class ParcelCreate(CreateView):
     model = Parcel
@@ -40,7 +37,6 @@ class ParcelDelete(DeleteView):
     model = Parcel
     success_url = '/parcels/'
 
-####################
 def home(request):
     return render(request, 'home.html')
 
