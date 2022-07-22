@@ -3,16 +3,93 @@
 
 <h1>Parcel Details</h1>
 
-<div class="card">
-  <div class="card-content">
-    <span class="card-title">Postage Paid: {{ parcel.postage }}</span>
-    <p>Weight: {{ parcel.weight }}</p>
-    <p>Destination: {{ parcel.destination }}</p>
+<div class="row">
+  <div class="col s6">
+    <div class="card">
+      <div class="card-content">
+        <span class="card-title">{{ parcel.postage }}</span>
+        <p>Weight: {{ parcel.weight }}</p>
+        <p>Destination: {{ parcel.destination }}</p>
+      </div>
+      <div class="card-action">
+        <a href="{% url 'parcels_update' parcel.id %}">Edit</a>
+        <a href="{% url 'parcels_update' parcel.id %}">Delete</a>
+      </div>
+    </div>
   </div>
-  <div class="card-action">
-    <a href="{% url 'parcels_update' parcel.id %}">Edit</a>
-    <a href="{% url 'parcels_delete' parcel.id %}">Delete</a>
+  <div class="col s6">
+    <form action="{% url 'add_pickup' parcel.id %}" method="post">
+      {% csrf_token %}
+      {{ pickup_form.as_p }}
+      <input type="submit" class="btn" value="Add Pickup">
+    </form>
+    <table class="striped">
+      <thead>
+        <tr><th>Date</th><th>Type</th></tr>
+      </thead>
+      <tbody>
+        {% for pickup in parcel.pickup_set.all %}
+          <tr>
+            <td>{{pickup.date}}</td>
+            <td>{{pickup.get_type_display}}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
+<hr>
+<div class="row">
+	<div class="col s6">
+		<h3>{{ parcel.postage }}'s Addons</h3>
+    {% if parcel.addons.count %}
+      {% for addon in parcel.addons.all %}
+        <div class="card">
+			<div class="card-content">
+				<span class="card-title">
+					A <span style="color: {{ addon.color }}">{{ addon.color }}</span> {{ addon.name }}
+            </span>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <h5>No Addons :(</h5>
+    {% endif %}
+  </div>
+  <!-- Available toys will come after this line -->
+  <div class="col s6">
+    <h3>Available Addons</h3>
+    {% if addons.count %}
+      {% for addon in addons.all %}
+        <div class="card">
+          <div class="card-content">
+            <span class="card-title">
+              A <span style="color: {{ addon.color }}">{{ addon.color }}</span> {{ addon.name }}
+            </span>
+          </div>
+          <div class="card-action">
+            <form action="{% url 'assoc_addon' parcel.id addon.id %}" method="post">
+                {% csrf_token %}
+              <button type="submit" class="btn">Add</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <h5>{{parcel.postage}} Already Has All Addons Available</h5>
+    {% endif %}
+  </div>
+</div>
+<script>
+  var dateEl = document.getElementById('id_date');
+  M.Datepicker.init(dateEl, {
+    format: 'yyyy-mm-dd',
+    defaultDate: new Date(),
+    setDefaultDate: true,
+    autoClose: true
+  });
 
+  var selectEl = document.getElementById('id_type');
+  M.FormSelect.init(selectEl);
+</script>
 {% endblock %}
