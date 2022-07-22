@@ -77,7 +77,7 @@ class AddOnsUpdate(UpdateView):
 
 class AddonsDelete(DeleteView):
   model = Addon
-  success_url = '/addon/'
+  success_url = '/addons/'
 
 def assoc_addon(request, parcel_id, addon_id):
   # Note that you can pass a toy's id instead of the whole object
