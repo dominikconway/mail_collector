@@ -1,11 +1,12 @@
 from django.shortcuts import redirect, render
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, DetailView
-from .models import Parcel, Addon
+from .models import Parcel, Addon, Photo
 from .forms import PickUpForm
-from django.http import HttpResponse
+import uuid
+import boto3
 
-# class Mail:
+#  class Mail:
 #     def __init__(self, postage, weight, destination):
 #         self.postage = postage
 #         self.weight = weight
@@ -18,6 +19,12 @@ from django.http import HttpResponse
 #     Mail('First-Class', 4, 'Park City'),
 #     Mail('Priority', 20, 'Charleston')
 # ]
+
+S3_BASE_URL = 'https://s3-us-west-1.amazonaws.com/'
+BUCKET = 'mail-collector-dc'
+
+
+
 
 #Class Based Views
 class ParcelCreate(CreateView):
@@ -35,7 +42,7 @@ class ParcelDelete(DeleteView):
 
 ####################
 def home(request):
-    return HttpResponse('<h1>Hello World</h1>')
+    return render(request, 'home.html')
 
 def about(request):
     return render(request, 'about.html')
@@ -61,6 +68,30 @@ def add_pickup(request, parcel_id):
         new_pickup.save()
     return redirect('detail', parcel_id=parcel_id)
 
+def add_photo(request, parcel_id):
+    # photo-file will be the "name" attribute on the <input type="file">
+    photo_file = request.FILES.get('photo-file', None)
+    if photo_file:
+        s3 = boto3.client('s3')
+        # need a unique "key" for S3 / needs image file extension too
+        key = uuid.uuid4().hex[:6] + photo_file.name[photo_file.name.rfind('.'):]
+        # just in case something goes wrong
+        try:
+            s3.upload_fileobj(photo_file, BUCKET, key)
+            # build the full url string
+            url = f"{S3_BASE_URL}{BUCKET}/{key}"
+            # we can assign to cat_id or cat (if you have a cat object)
+            photo = Photo(url=url, parcel_id=parcel_id)
+            photo.save()
+        except:
+            print('An error occurred uploading file to S3')
+    return redirect('detail', parcel_id=parcel_id)
+
+def assoc_addon(request, parcel_id, addon_id):
+  # Note that you can pass a toy's id instead of the whole object
+  Parcel.objects.get(id=parcel_id).addons.add(addon_id)
+  return redirect('detail', parcel_id=parcel_id)
+
 class AddonsList(ListView):
   model = Addon
 
@@ -79,7 +110,4 @@ class AddonsDelete(DeleteView):
   model = Addon
   success_url = '/addons/'
 
-def assoc_addon(request, parcel_id, addon_id):
-  # Note that you can pass a toy's id instead of the whole object
-  Parcel.objects.get(id=parcel_id).addons.add(addon_id)
-  return redirect('detail', parcel_id=parcel_id)
+
