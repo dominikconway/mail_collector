@@ -17,4 +17,5 @@ urlpatterns = [
     path('addons/create/', views.AddOnsCreate.as_view(), name='addons_create'),
     path('addons/<int:pk>/update/', views.AddOnsUpdate.as_view(), name='addons_update'),
     path('addons/<int:pk>/delete/', views.AddonsDelete.as_view(), name='addons_delete'),
+    path('accounts/signup/', views.signup, name='signup'),
 ]

@@ -1,6 +1,10 @@
 from django.shortcuts import redirect, render
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, DetailView
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Parcel, Addon, Photo
 from .forms import PickUpForm
 import uuid
@@ -24,16 +28,22 @@ S3_BASE_URL = 'https://s3-us-west-1.amazonaws.com/'
 BUCKET = 'mail-collector-dc'
 
 #Class Based Views
-class ParcelCreate(CreateView):
+class ParcelCreate(LoginRequiredMixin, CreateView):
     model = Parcel
-    fields = '__all__'
+    fields = ['postage', 'weight', 'destination']
     success_url = '/parcels/'
 
-class ParcelUpdate(UpdateView):
+    def form_valid(self, form):
+        form.instance.user = self.request.user  
+        return super().form_valid(form)
+
+    
+
+class ParcelUpdate(LoginRequiredMixin, UpdateView):
     model = Parcel
     fields = ['postage', 'weight', 'destination']
 
-class ParcelDelete(DeleteView):
+class ParcelDelete(LoginRequiredMixin, DeleteView):
     model = Parcel
     success_url = '/parcels/'
 
@@ -43,10 +53,12 @@ def home(request):
 def about(request):
     return render(request, 'about.html')
 
+@login_required
 def parcels_index(request):
-    parcels = Parcel.objects.all()
+    parcels = Parcel.objects.filter(user=request.user)
     return render(request, 'parcels/index.html', {'parcels': parcels})
 
+@login_required
 def parcels_detail(request, parcel_id):
     parcel = Parcel.objects.get(id=parcel_id)
     addons_parcel_doesnt_have = Addon.objects.exclude(id__in = parcel.addons.all().values_list('id'))
@@ -56,6 +68,7 @@ def parcels_detail(request, parcel_id):
         'addons' : addons_parcel_doesnt_have
         })
 
+@login_required
 def add_pickup(request, parcel_id):
     form = PickUpForm(request.POST)
     if form.is_valid():
@@ -64,6 +77,7 @@ def add_pickup(request, parcel_id):
         new_pickup.save()
     return redirect('detail', parcel_id=parcel_id)
 
+@login_required
 def add_photo(request, parcel_id):
     # photo-file will be the "name" attribute on the <input type="file">
     photo_file = request.FILES.get('photo-file', None)
@@ -83,26 +97,46 @@ def add_photo(request, parcel_id):
             print('An error occurred uploading file to S3')
     return redirect('detail', parcel_id=parcel_id)
 
+@login_required
 def assoc_addon(request, parcel_id, addon_id):
   # Note that you can pass a toy's id instead of the whole object
   Parcel.objects.get(id=parcel_id).addons.add(addon_id)
   return redirect('detail', parcel_id=parcel_id)
 
-class AddonsList(ListView):
+def signup(request):
+  error_message = ''
+  if request.method == 'POST':
+    # This is how to create a 'user' form object
+    # that includes the data from the browser
+    form = UserCreationForm(request.POST)
+    if form.is_valid():
+      # This will add the user to the database
+      user = form.save()
+      # This is how we log a user in via code
+      login(request, user)
+      return redirect('index')
+    else:
+      error_message = 'Invalid sign up - try again'
+  # A bad POST or a GET request, so render signup.html with an empty form
+  form = UserCreationForm()
+  context = {'form': form, 'error_message': error_message}
+  return render(request, 'registration/signup.html', context)
+
+class AddonsList(LoginRequiredMixin, ListView):
   model = Addon
 
-class AddOnsDetail(DetailView):
+class AddOnsDetail(LoginRequiredMixin, DetailView):
   model = Addon
 
-class AddOnsCreate(CreateView):
+class AddOnsCreate(LoginRequiredMixin, CreateView):
   model = Addon
   fields = '__all__'
 
-class AddOnsUpdate(UpdateView):
+class AddOnsUpdate(LoginRequiredMixin, UpdateView):
   model = Addon
   fields = ['name', 'color']
 
-class AddonsDelete(DeleteView):
+class AddonsDelete(LoginRequiredMixin, DeleteView):
   model = Addon
   success_url = '/addons/'
 

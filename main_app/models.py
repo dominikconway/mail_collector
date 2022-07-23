@@ -1,6 +1,7 @@
 from datetime import date
 from django.db import models
 from django.urls import reverse
+from django.contrib.auth.models import User
 
 TYPES = (
     ('L', 'Letter'),
@@ -22,8 +23,8 @@ class Parcel(models.Model):
     postage = models.CharField(max_length=100)
     weight = models.IntegerField()
     destination = models.CharField(max_length=100)
-
     addons = models.ManyToManyField(Addon)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.postage
